@@ -29,4 +29,4 @@ jobs:
         app-name: 'chainreaction-server'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_aa2cdc5948394c6384c2ec9408d1c791 }}
-        package: '${{ github.workspace }}/target/*.war'
+        package: '${{ github.workspace }}/target/*.jar'
