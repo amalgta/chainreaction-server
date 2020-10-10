@@ -7,7 +7,7 @@ import studio.styx.chainreaction.model.PlaygroundDto
 class PlaygroundService {
     fun getAllPlaygrounds(): List<PlaygroundDto> {
         val playgrounds = ArrayList<PlaygroundDto>()
-        playgrounds.add(PlaygroundDto("1", "GTA", "new", "testbox123"))
+        playgrounds.add(PlaygroundDto("1", "2GOOD", "new", "testbox123"))
         playgrounds.add(PlaygroundDto("2", "AGT", "new", "testbox123"))
         playgrounds.add(PlaygroundDto("3", "TGA", "new", "testbox123"))
         playgrounds.add(PlaygroundDto("4", "GAT", "new", "testbox123"))
