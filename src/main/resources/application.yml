@@ -1,16 +1,11 @@
-server.port: ${PORT:8080}
-
 spring:
   main:
     banner-mode: "off"
 
-keybout:
-  latency: 0
+server.port: ${PORT:8080}
 
 logging.level:
   ROOT: INFO
-
----
 
 spring.profiles: color
 
