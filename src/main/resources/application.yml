@@ -5,7 +5,7 @@ spring:
 server.port: ${PORT:8080}
 
 logging.level:
-  ROOT: INFO
+  ROOT: DEBUG
 
 spring.profiles: color
 
@@ -16,4 +16,12 @@ spring.output.ansi.enabled: ALWAYS
 spring.profiles: dev
 
 logging.level:
-  studio.styx: TRACE
+  studio.styx: DEBUG
+
+---
+azure:
+  cosmosdb:
+    uri: https://chainreaction-server-db.documents.azure.com:443/
+    key: iOgJSffolWvtGX8IDfAAknA2PsLJbvyX5tXoO4ht4Ndr6wBi5gCB0N3Jkin063nbd9uc7cLxuWXW4cT5vl5IPA==
+    database: chainreaction-server-db-object
+---
