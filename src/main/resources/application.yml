@@ -5,7 +5,7 @@ spring:
 server.port: ${PORT:8080}
 
 logging.level:
-  ROOT: INFO
+  ROOT: DEBUG
 
 spring.profiles: color
 
@@ -16,4 +16,4 @@ spring.output.ansi.enabled: ALWAYS
 spring.profiles: dev
 
 logging.level:
-  studio.styx: TRACE
+  studio.styx: DEBUG

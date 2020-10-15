@@ -1,7 +1,6 @@
-package studio.styx.chainreaction.model
+package studio.styx.chainreaction.domain.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import studio.styx.chainreaction.domain.model.Status
 
 data class DefaultPlaygroundRequestDto(
         val host: DefaultPlayerRequestDto, @JsonProperty("max_allowed_players") val maxAllowedPlayers: Int, val private: Boolean)

@@ -1,6 +1,7 @@
 package studio.styx.chainreaction.domain.document
 
 import studio.styx.chainreaction.domain.model.Status
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -15,5 +16,5 @@ class Playground(
     val id: Long = counter.incrementAndGet()
 
 
-    val players = mutableListOf<Player>()
+    val players = ConcurrentHashMap<String, Player>()
 }
