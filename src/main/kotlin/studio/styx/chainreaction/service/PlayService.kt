@@ -20,6 +20,8 @@ class PlayService(private val playgroundService: PlaygroundService, private val 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private val games = mutableMapOf<Long, GameDescriptor>()
+    private val runningGames = mutableMapOf<Long, ChainReactionGameService>()
+    val runningGamesCounter = Counter()
 
     @Synchronized
     fun createGame(session: WebSocketSession, gameDescriptor: GameDescriptor, host: PlayBoy) {
@@ -90,12 +92,14 @@ class PlayService(private val playgroundService: PlaygroundService, private val 
             }
 
             // Build the game instance
-            /*
-            val game = applicationContext.getBean(descriptor.mode.type).apply {
-                initializeGame(descriptor, players)
+            val game = applicationContext.getBean(ChainReactionGameService::class.java).apply {
+                initializeGame(descriptor)
                 startCountdown()
             }
-             */
+            runningGames[game.id] = game
+            runningGamesCounter.increment()
+
+            game.players.forEach { it.state = (ClientState.PLAYING) }
 
             logger.info("Started game {} ({} player{}",
                     descriptor.id,

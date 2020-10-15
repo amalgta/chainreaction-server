@@ -45,7 +45,7 @@ class PlayController(private val playService: PlayService) : TextWebSocketHandle
                             }
                         }
                         ACTION_JOIN_GAME -> {
-                            if (action.checkArgumentsCount(3)) {
+                            if (action.checkArgumentsCount(2)) {
                                 processed = true
                                 val nickname = action.arguments[0]
                                 val gameId = action.arguments[1].toLong()
