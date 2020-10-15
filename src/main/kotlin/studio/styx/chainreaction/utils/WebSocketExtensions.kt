@@ -36,7 +36,7 @@ var WebSocketSession.state: ClientState
         logger.debug("Changed state to '{}' for {}{}",
                 state,
                 description,
-                if (state == ClientState.OPENED) " with '${getTransportName()}' transport" else "")
+                if (state == ClientState.LOBBY) " with '${getTransportName()}' transport" else "")
     }
 
 var WebSocketSession.gameId: Long?

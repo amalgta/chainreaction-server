@@ -5,6 +5,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.WebSocketSession
+import studio.styx.chainreaction.api.model.reactive.PlayerLeftNotification
+import studio.styx.chainreaction.api.model.reactive.GameDroppedNotification
+import studio.styx.chainreaction.api.model.reactive.GameLeftNotification
+import studio.styx.chainreaction.api.model.reactive.NameAlreadyTakenException
+import studio.styx.chainreaction.api.model.reactive.NoSuchGameNotification
 import studio.styx.chainreaction.domain.model.*
 import studio.styx.chainreaction.domain.model.Constants.MAX_NAME_LENGTH
 import studio.styx.chainreaction.domain.model.Constants.MIN_NAME_LENGTH
@@ -15,7 +20,6 @@ class PlayService(private val playgroundService: PlaygroundService, private val 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private val games = mutableMapOf<Long, GameDescriptor>()
-    val gamesCounter = Counter()
 
     @Synchronized
     fun createGame(session: WebSocketSession, gameDescriptor: GameDescriptor, host: PlayBoy) {
@@ -27,13 +31,12 @@ class PlayService(private val playgroundService: PlaygroundService, private val 
                 throw Notification(TooLongNameNotification())
             }
             else -> {
+                games[gameDescriptor.id] = gameDescriptor
+                games[gameDescriptor.id]?.players?.set(host, session)
                 with(session) {
                     state = ClientState.CREATED
                     gameId = gameDescriptor.id
                 }
-                gameDescriptor.players[host] = session
-                games[gameDescriptor.id] = gameDescriptor
-                gamesCounter.increment()
             }
         }
     }
@@ -68,10 +71,9 @@ class PlayService(private val playgroundService: PlaygroundService, private val 
         val gameDescriptor = games[session.gameId]
         if (gameDescriptor != null) {
             games.remove(session.gameId)
-            gamesCounter.decrement()
             session.state = ClientState.LOBBY
             gameDescriptor.players.forEach {
-                it.value.sendObjectMessage(GameDeletedNotification())
+                it.value.sendObjectMessage(GameDroppedNotification())
                 it.value.state = ClientState.LOBBY
             }
         }
@@ -88,10 +90,12 @@ class PlayService(private val playgroundService: PlaygroundService, private val 
             }
 
             // Build the game instance
+            /*
             val game = applicationContext.getBean(descriptor.mode.type).apply {
                 initializeGame(descriptor, players)
                 startCountdown()
             }
+             */
 
             logger.info("Started game {} ({} player{}",
                     descriptor.id,
@@ -106,32 +110,25 @@ class PlayService(private val playgroundService: PlaygroundService, private val 
         games[session.gameId]?.players?.remove(playBoy)
         session.state = (ClientState.LOBBY)
         session.gameId = null
-        session.sendObjectMessage()
+        session.sendObjectMessage(GameLeftNotification())
+        games[session.gameId]?.players?.forEach {
+            it.value.sendObjectMessage(PlayerLeftNotification())
+        }
     }
 
     fun disconnect(session: WebSocketSession) {
         when (session.state) {
-            ClientState.OPENED -> {
-            }
-            ClientState.LOBBY -> {
-            }
             ClientState.CREATED -> deleteGame(session)
-            ClientState.JOINED -> leaveGame(session)
-            ClientState.PLAYING -> {
+            ClientState.JOINED, ClientState.PLAYING -> {
                 synchronized(this) {
-                    runningGames[session.gameId]?.let {
-                        if (it.removeUser(session)) {
-                            // No player left or race game ended, remove the game
-                            endGame(it.id)
-                        }
-                    }
+                    leaveGame(session)
                 }
             }
         }
     }
 
 
-    data class PlayBoy(val nickname: String, val color: String, val isHost: Boolean)
+    data class PlayBoy(val nickname: String, val isHost: Boolean)
 
 
 }

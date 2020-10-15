@@ -1,4 +1,4 @@
-package studio.styx.chainreaction.api
+package studio.styx.chainreaction.api.controller.rest
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import studio.styx.chainreaction.domain.document.Player
 import studio.styx.chainreaction.domain.document.Playground
-import studio.styx.chainreaction.model.DefaultPlaygroundRequestDto
-import studio.styx.chainreaction.model.DefaultPlaygroundResponseDto
+import studio.styx.chainreaction.domain.model.DefaultPlaygroundRequestDto
+import studio.styx.chainreaction.domain.model.DefaultPlaygroundResponseDto
 import studio.styx.chainreaction.service.PlaygroundService
 import javax.servlet.http.HttpServletRequest
 

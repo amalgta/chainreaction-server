@@ -39,18 +39,6 @@ class WordsListNotification(
         val words: List<Array<String>>) : BaseNotification(Constants.NOTIFICATION_WORDS_LIST)
 
 /**
- * Sent when a round ended. Contains the last words update and the scores.
- */
-class ScoresNotification(
-        // Same as 'words' attribute in preceding notification
-        val words: List<Array<String>>,
-        val roundScores: List<ScoreDto>,
-        val gameScores: List<ScoreDto>,
-        val manager: String,
-        val roundId: Int,
-        val gameOver: Boolean) : BaseNotification(Constants.NOTIFICATION_SCORES)
-
-/**
  * Sent at the end of a round, when the manager changed.
  */
 class ManagerNotification(val manager: String) : BaseNotification(Constants.NOTIFICATION_MANAGER)

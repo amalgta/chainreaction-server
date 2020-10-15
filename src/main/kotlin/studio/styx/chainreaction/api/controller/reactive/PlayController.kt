@@ -1,4 +1,4 @@
-package studio.styx.chainreaction.controller
+package studio.styx.chainreaction.api.controller.reactive
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -10,30 +10,20 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 import studio.styx.chainreaction.domain.model.Action
 import studio.styx.chainreaction.domain.model.ClientState
 import studio.styx.chainreaction.domain.model.Constants.ACTION_CREATE_GAME
-import studio.styx.chainreaction.domain.model.Constants.ACTION_DELETE_GAME
+import studio.styx.chainreaction.domain.model.Constants.ACTION_DROP_GAME
 import studio.styx.chainreaction.domain.model.Constants.ACTION_JOIN_GAME
 import studio.styx.chainreaction.domain.model.Constants.ACTION_LEAVE_GAME
 import studio.styx.chainreaction.domain.model.Constants.ACTION_START_GAME
 import studio.styx.chainreaction.domain.model.GameDescriptor
 import studio.styx.chainreaction.domain.model.Notification
 import studio.styx.chainreaction.service.PlayService
+import studio.styx.chainreaction.api.model.reactive.GameCreatedNotification
+import studio.styx.chainreaction.api.model.reactive.GameJoinedNotification
 import studio.styx.chainreaction.utils.*
 
 @Service
 class PlayController(private val playService: PlayService) : TextWebSocketHandler() {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
-    override fun afterConnectionEstablished(session: WebSocketSession) {
-        session.nickname = ""
-        session.setState(ClientState.LOBBY)
-    }
-
-    override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        playService.disconnect(session)
-        logger.debug("Closed {} with code {} and reason '{}'",
-                session.description,
-                status.code,
-                status.reason.orEmpty())
-    }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         try {
@@ -45,33 +35,30 @@ class PlayController(private val playService: PlayService) : TextWebSocketHandle
                     when (action.command) {
                         ACTION_CREATE_GAME -> {
                             processed = true
-                            if (action.checkArgumentsCount(3)) {
+                            if (action.checkArgumentsCount(2)) {
                                 val nickname = action.arguments[0]
-                                val color = action.arguments[1]
-                                val maxAllowedPlayers = action.arguments[2].toInt()
+                                val maxAllowedPlayers = action.arguments[1].toInt()
                                 val gameDescriptor = GameDescriptor(maxAllowedPlayers)
-                                playService.createGame(session, gameDescriptor, PlayService.PlayBoy(nickname, color, true))
+                                playService.createGame(session, gameDescriptor, PlayService.PlayBoy(nickname, true))
                                 session.nickname = nickname
-                                session.sendObjectMessage(GameCreatedNotification());
+                                session.sendObjectMessage(GameCreatedNotification(gameDescriptor.id));
                             }
                         }
                         ACTION_JOIN_GAME -> {
                             if (action.checkArgumentsCount(3)) {
                                 processed = true
                                 val nickname = action.arguments[0]
-                                val color = action.arguments[1]
-                                val gameId = action.arguments[2].toLong()
-                                playService.joinGame(session, gameId, PlayService.PlayBoy(nickname, color, false))
+                                val gameId = action.arguments[1].toLong()
+                                playService.joinGame(session, gameId, PlayService.PlayBoy(nickname, false))
                                 session.nickname = nickname;
                                 session.sendObjectMessage(GameJoinedNotification())
-
                             }
                         }
                     }
                 }
                 ClientState.CREATED -> {
                     when (action.command) {
-                        ACTION_DELETE_GAME -> {
+                        ACTION_DROP_GAME -> {
                             processed = true
                             playService.deleteGame(session)
                         }
@@ -89,19 +76,30 @@ class PlayController(private val playService: PlayService) : TextWebSocketHandle
                         }
                     }
                 }
+                ClientState.PLAYING -> {
+                }
             }
             if (!processed) {
-                logInvalidMessage(session, message)
+                logger.warn("Invalid message '{}' for state {} of {}", message.payload, session.state, session.description)
             }
         } catch (e: Notification) {
-            session.sendMessage(e.baseNotification.)
+            session.sendObjectMessage(e)
         } catch (e: Exception) {
             logger.error("Caught an exception during message processing", e)
         }
     }
 
-    private fun logInvalidMessage(session: WebSocketSession, message: TextMessage) {
-        logger.warn("Invalid message '{}' for state {} of {}", message.payload, session.state, session.description)
+    override fun afterConnectionEstablished(session: WebSocketSession) {
+        session.nickname = ""
+        session.state = ClientState.LOBBY
+    }
+
+    override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        playService.disconnect(session)
+        logger.debug("Closed {} with code {} and reason '{}'",
+                session.description,
+                status.code,
+                status.reason.orEmpty())
     }
 
 }

@@ -5,10 +5,6 @@ package studio.styx.chainreaction.domain.model
  */
 enum class ClientState {
     /**
-     * The connection was successfully opened and the user is not yet identified.
-     */
-    OPENED,
-    /**
      * The user is identified and is in the lobby getting the list of games.
      */
     LOBBY,
