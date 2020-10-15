@@ -8,7 +8,6 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSession
 import studio.styx.chainreaction.domain.model.ClientState
 import studio.styx.chainreaction.domain.model.Constants.GSON
-import java.net.http.WebSocket
 
 // WebSocketSession extensions and utility methods, such as:
 // - Business attributes: server side state, user name, game ID (0 means no actual game)
