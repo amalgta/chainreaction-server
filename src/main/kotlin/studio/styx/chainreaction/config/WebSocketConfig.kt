@@ -11,6 +11,6 @@ import studio.styx.chainreaction.api.controller.reactive.PlayController
 class WebSocketConfig(private val playController: PlayController) : WebSocketConfigurer {
 
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(playController, "/api/websocket").setAllowedOrigins("*").withSockJS()
+        registry.addHandler(playController, "v1/play").setAllowedOrigins("*").withSockJS()
     }
 }
